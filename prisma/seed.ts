@@ -20,14 +20,16 @@ async function main() {
           name: u.name,
           passwordHash: u.passwordHash,
           role: u.role as UserRole,
-          preferences: u.preferences || {}
+          preferences: u.preferences || {},
+          profilePrivacy: u.profilePrivacy || {}
         },
         create: {
           email: u.email,
           name: u.name,
           passwordHash: u.passwordHash,
           role: u.role as UserRole,
-          preferences: u.preferences || {}
+          preferences: u.preferences || {},
+          profilePrivacy: u.profilePrivacy || {}
         }
       });
 

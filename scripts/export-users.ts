@@ -22,6 +22,7 @@ async function main() {
     passwordHash: user.passwordHash,
     role: user.role,
     preferences: user.preferences,
+    profilePrivacy: user.profilePrivacy,
     vendorProfile: user.vendorProfile ? {
       intro: user.vendorProfile.intro,
       logoUrl: user.vendorProfile.logoUrl,

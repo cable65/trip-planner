@@ -5,6 +5,7 @@
     "passwordHash": "$2a$10$F4mR60PdBCni2I4X9ytgieX3DhMdsQAAqw8yZD82WQMY.WUNZUXiK",
     "role": "admin",
     "preferences": {},
+    "profilePrivacy": {},
     "vendorProfile": null
   },
   {
@@ -15,6 +16,7 @@
     "preferences": {
       "currency": "MYR"
     },
+    "profilePrivacy": {},
     "vendorProfile": {
       "intro": "Best trips in town!",
       "logoUrl": "/uploads/vendor/logo-66f0a524-9583-4589-b70a-f482f9a7d43a.jpg",
@@ -33,6 +35,7 @@
     "preferences": {
       "currency": "MYR"
     },
+    "profilePrivacy": {},
     "vendorProfile": null
   }
 ]
