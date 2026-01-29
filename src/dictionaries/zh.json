@@ -1,0 +1,32 @@
+{
+  "nav": {
+    "trips": "行程",
+    "settings": "设置",
+    "auditLogs": "审计日志",
+    "signOut": "登出",
+    "login": "登录",
+    "register": "注册"
+  },
+  "settings": {
+    "title": "设置",
+    "preferences": "偏好设置",
+    "language": "语言",
+    "languageHelp": "选择旅行规划系统的语言。",
+    "currency": "货币",
+    "selectCurrency": "选择货币",
+    "currencyHelp": "选择用于预算和付款的偏好货币。",
+    "save": "保存偏好"
+  },
+  "generateTrip": {
+    "title": "生成行程",
+    "destination": "目的地 (马来西亚)",
+    "selectDestination": "选择目的地",
+    "travelStyle": "旅行风格",
+    "selectStyle": "选择风格",
+    "startDate": "开始日期",
+    "endDate": "结束日期",
+    "budget": "预算 (可选)",
+    "interests": "兴趣 (按住 Ctrl/Cmd 多选)",
+    "submit": "生成行程"
+  }
+}

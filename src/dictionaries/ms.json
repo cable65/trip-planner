@@ -1,0 +1,32 @@
+{
+  "nav": {
+    "trips": "Perjalanan",
+    "settings": "Tetapan",
+    "auditLogs": "Log Audit",
+    "signOut": "Log Keluar",
+    "login": "Log Masuk",
+    "register": "Daftar"
+  },
+  "settings": {
+    "title": "Tetapan",
+    "preferences": "Keutamaan",
+    "language": "Bahasa",
+    "languageHelp": "Pilih bahasa untuk sistem Perancang Perjalanan.",
+    "currency": "Mata Wang",
+    "selectCurrency": "Pilih mata wang",
+    "currencyHelp": "Pilih mata wang pilihan untuk bajet dan pembayaran.",
+    "save": "Simpan Keutamaan"
+  },
+  "generateTrip": {
+    "title": "Jana Perjalanan",
+    "destination": "Destinasi (Malaysia)",
+    "selectDestination": "Pilih destinasi",
+    "travelStyle": "Gaya Perjalanan",
+    "selectStyle": "Pilih gaya",
+    "startDate": "Tarikh Mula",
+    "endDate": "Tarikh Tamat",
+    "budget": "Bajet (Pilihan)",
+    "interests": "Minat (Tahan Ctrl/Cmd untuk pilih berbilang)",
+    "submit": "Jana Itinerari"
+  }
+}

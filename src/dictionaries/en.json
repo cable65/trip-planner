@@ -1,0 +1,33 @@
+{
+  "nav": {
+    "trips": "Trips",
+    "settings": "Settings",
+    "auditLogs": "Audit Logs",
+    "signOut": "Sign out",
+    "login": "Login",
+    "register": "Register"
+  },
+  "settings": {
+    "title": "Settings",
+    "preferences": "Preferences",
+    "language": "Language",
+    "languageHelp": "Choose the language for the Trip Planner system.",
+    "currency": "Currency",
+    "selectCurrency": "Select currency",
+    "currencyHelp": "Choose your preferred currency for budgets and payments.",
+    "save": "Save Preferences"
+  },
+  "generateTrip": {
+    "title": "Generate a trip",
+    "destination": "Destination (Malaysia)",
+    "selectDestination": "Select destination",
+    "travelStyle": "Travel style",
+    "selectStyle": "Select style",
+    "startDate": "Start date",
+    "endDate": "End date",
+    "budget": "Budget (Total)",
+    "pax": "Travelers",
+    "interests": "Interests (Hold Ctrl/Cmd to select multiple)",
+    "submit": "Generate itinerary"
+  }
+}

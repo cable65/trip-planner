@@ -1,0 +1,537 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  traveler
+  vendor
+  admin
+}
+
+enum TripStatus {
+  draft
+  planned
+  booked
+  cancelled
+}
+
+enum BookingStatus {
+  pending
+  confirmed
+  cancelled
+  refunded
+}
+
+enum PaymentStatus {
+  pending
+  paid
+  failed
+  refunded
+}
+
+model User {
+  id           String   @id @default(cuid())
+  name         String?
+  email        String   @unique
+  passwordHash String
+  role         UserRole @default(traveler)
+  preferences  Json     @default("{}")
+  phone        String?
+  jobTitle     String?
+  company      String?
+  location     String?
+  website      String?
+  bio          String?
+  avatarUrl    String?
+  coverUrl     String?
+  profilePrivacy Json   @default("{}")
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  trips       Trip[]
+  payments    Payment[]
+  reviews     Review[]
+  vendorProfile VendorProfile?
+  tripShares  TripShare[]
+  campaigns   Campaign[]
+  profileMetrics ProfileMetric?
+  vendorPackages VendorPackage[]
+
+  profileChangeChallenges ProfileChangeChallenge[]
+  aiImageLogs AiImageLog[]
+  itineraryRevisions ItineraryRevision[]
+
+  accounts Account[]
+  sessions Session[]
+  
+  // Messaging
+  conversations ConversationParticipant[]
+  sentMessages  Message[]
+  
+  // Notifications
+  notifications Notification[]
+}
+
+model Conversation {
+  id        String    @id @default(cuid())
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  
+  participants ConversationParticipant[]
+  messages     Message[]
+}
+
+model ConversationParticipant {
+  id             String       @id @default(cuid())
+  conversationId String
+  userId         String
+  lastReadAt     DateTime?
+  createdAt      DateTime     @default(now())
+
+  conversation Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([conversationId, userId])
+}
+
+model Message {
+  id             String       @id @default(cuid())
+  conversationId String
+  senderId       String
+  content        String
+  attachments    Json         @default("[]")
+  readAt         DateTime?
+  createdAt      DateTime     @default(now())
+
+  conversation Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  sender       User         @relation(fields: [senderId], references: [id], onDelete: Cascade)
+}
+
+model Notification {
+  id        String   @id @default(cuid())
+  userId    String
+  type      String
+  title     String
+  message   String
+  data      Json?
+  read      Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model AiImageLog {
+  id        String   @id @default(cuid())
+  userId    String?
+  prompt    String
+  imageUrl  String
+  costCents Int      @default(0)
+  cached    Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+}
+
+model VendorProfile {
+  id        String   @id @default(cuid())
+  userId    String   @unique
+  intro     String?
+  logoUrl   String?
+  bannerUrl String?
+  location  String?
+  phone     String?
+  website   String?
+  isApproved Boolean @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model ProfileMetric {
+  vendorId  String   @unique
+  views     Int      @default(0)
+  engagements Int    @default(0)
+  conversions Int    @default(0)
+  updatedAt DateTime @updatedAt
+
+  vendor User @relation(fields: [vendorId], references: [id], onDelete: Cascade)
+}
+
+model PackageMetric {
+  packageId String   @unique
+  views     Int      @default(0)
+  bookings  Int      @default(0)
+  revenue   Int      @default(0)
+  updatedAt DateTime @updatedAt
+
+  package VendorPackage @relation(fields: [packageId], references: [id], onDelete: Cascade)
+}
+
+model CampaignMetric {
+  campaignId String   @unique
+  views      Int      @default(0)
+  clicks     Int      @default(0)
+  conversions Int     @default(0)
+  engagements Int     @default(0)
+  costCents  Int      @default(0)
+  revenueCents Int    @default(0)
+  updatedAt  DateTime @updatedAt
+
+  campaign Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+}
+
+model Trip {
+  id          String     @id @default(cuid())
+  userId      String
+  destination String
+  startDate   DateTime
+  endDate     DateTime
+  budget      Int?
+  interests   String[]
+  travelStyle String?
+  imageUrl    String?
+  pax         Int        @default(1)
+  itinerary   Json       @default("{}")
+  status      TripStatus @default(draft)
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  bookings   Booking[]
+  tripShares TripShare[]
+  itineraryRevisions ItineraryRevision[]
+}
+
+model ItineraryRevision {
+  id        String   @id @default(cuid())
+  tripId    String
+  version   Int
+  data      Json
+  createdAt DateTime @default(now())
+  actorId   String?
+
+  trip Trip @relation(fields: [tripId], references: [id], onDelete: Cascade)
+  user User? @relation(fields: [actorId], references: [id], onDelete: SetNull)
+
+  @@unique([tripId, version])
+}
+
+model Booking {
+  id        String        @id @default(cuid())
+  tripId    String
+  vendorId  String?
+  type      String
+  price     Int
+  startDate DateTime?
+  endDate   DateTime?
+  status    BookingStatus @default(pending)
+  notes     String?
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+
+  trip     Trip      @relation(fields: [tripId], references: [id], onDelete: Cascade)
+  payments Payment[]
+}
+
+model Payment {
+  id        String        @id @default(cuid())
+  userId    String
+  bookingId String
+  amount    Int
+  currency  String
+  status    PaymentStatus @default(pending)
+  metadata  Json          @default("{}")
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  booking Booking @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+}
+
+model Review {
+  id         String   @id @default(cuid())
+  userId     String
+  targetType String
+  targetId   String
+  rating     Int
+  comment    String
+  media      Json     @default("[]")
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([targetType, targetId])
+}
+
+enum ShareStatus {
+  PENDING
+  RESPONDED
+  ACCEPTED
+  REJECTED
+  EXPIRED
+}
+
+enum QuoteStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
+}
+
+model TripShare {
+  id        String      @id @default(cuid())
+  tripId    String
+  vendorId  String
+  status    ShareStatus @default(PENDING)
+  expiresAt DateTime
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+
+  trip   Trip   @relation(fields: [tripId], references: [id], onDelete: Cascade)
+  vendor User   @relation(fields: [vendorId], references: [id], onDelete: Cascade)
+  quote  Quote?
+
+  @@index([tripId])
+  @@index([vendorId])
+}
+
+model Quote {
+  id          String      @id @default(cuid())
+  tripShareId String      @unique
+  price       Int
+  currency    String
+  notes       String?
+  attachments Json        @default("[]")
+  status      QuoteStatus @default(PENDING)
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  tripShare TripShare @relation(fields: [tripShareId], references: [id], onDelete: Cascade)
+}
+
+model VendorPackage {
+  id            String   @id @default(cuid())
+  vendorId      String
+  name          String
+  description   String
+  priceCents    Int
+  commissionRate Int     @default(0)
+  isApproved    Boolean  @default(false)
+  isArchived    Boolean  @default(false)
+  media         Json     @default("[]")
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  vendor User @relation(fields: [vendorId], references: [id], onDelete: Cascade)
+  components PackageComponent[]
+  availability PackageAvailability[]
+  metrics    PackageMetric?
+
+  @@index([vendorId])
+}
+
+model PackageComponent {
+  id         String   @id @default(cuid())
+  packageId  String
+  type       String
+  title      String
+  details    Json     @default("{}")
+
+  pkg VendorPackage @relation(fields: [packageId], references: [id], onDelete: Cascade)
+  @@index([packageId])
+}
+
+model PackageAvailability {
+  id         String   @id @default(cuid())
+  packageId  String
+  dateFrom   DateTime
+  dateTo     DateTime
+  quantity   Int      @default(0)
+
+  pkg VendorPackage @relation(fields: [packageId], references: [id], onDelete: Cascade)
+  @@index([packageId])
+}
+
+model Currency {
+  code      String   @id
+  label     String?
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Language {
+  code      String   @id
+  label     String
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model TravelStyle {
+  id        String   @id @default(cuid())
+  name      String   @unique
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model InterestTag {
+  id        String   @id @default(cuid())
+  name      String   @unique
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Destination {
+  id        String   @id @default(cuid())
+  name      String   @unique
+  country   String   @default("Malaysia")
+  imageUrl  String?
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model TripUiPreference {
+  id         String   @id @default("default")
+  visibility Json     @default("{}")
+  sequence   Json     @default("[]")
+  version    Int      @default(1)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
+
+enum CampaignStatus {
+  draft
+  scheduled
+  sending
+  paused
+  sent
+  cancelled
+}
+
+model Campaign {
+  id          String         @id @default(cuid())
+  vendorId    String
+  name        String
+  subject     String
+  content     String
+  status      CampaignStatus @default(draft)
+  scheduledAt DateTime?
+  target      Json           @default("{}")
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+
+  vendor User @relation(fields: [vendorId], references: [id], onDelete: Cascade)
+  metrics CampaignMetric?
+  variations CampaignVariation[]
+
+  @@index([vendorId])
+}
+
+model CampaignVariation {
+  id         String   @id @default(cuid())
+  campaignId String
+  name       String
+  content    String
+  target     Json     @default("{}")
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  campaign Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  metrics   VariationMetric?
+
+  @@index([campaignId])
+}
+
+model VariationMetric {
+  variationId String   @unique
+  views       Int      @default(0)
+  clicks      Int      @default(0)
+  conversions Int      @default(0)
+  engagements Int      @default(0)
+  costCents   Int      @default(0)
+  revenueCents Int     @default(0)
+  updatedAt   DateTime @updatedAt
+
+  variation CampaignVariation @relation(fields: [variationId], references: [id], onDelete: Cascade)
+}
+
+model ProfileChangeChallenge {
+  id        String   @id @default(cuid())
+  userId    String
+  codeHash  String
+  expiresAt DateTime
+  attempts  Int      @default(0)
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model AuditLog {
+  id           String   @id @default(cuid())
+  timestamp    DateTime @default(now())
+  actorId      String?
+  actorRole    String?
+  action       String
+  resourceType String
+  resourceId   String?
+  ipAddress    String?
+  userAgent    String?
+  oldValue     Json?
+  newValue     Json?
+  metadata     Json     @default("{}")
+  prevHash     String?
+  entryHash    String
+
+  @@index([timestamp])
+  @@index([actorId])
+  @@index([action])
+  @@index([resourceType, resourceId])
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
