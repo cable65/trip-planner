@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { prisma } from "@/lib/prisma";
 import { requireUser } from "@/lib/require-auth";
 
@@ -158,7 +159,13 @@ export default async function VendorsDirectory({ searchParams }: { searchParams?
               <div className="flex items-center gap-3">
                 <div className="h-12 w-12 overflow-hidden rounded-full bg-neutral-800">
                   {v.vendorProfile?.logoUrl ? (
-                    <img src={v.vendorProfile.logoUrl} alt="Logo" className="h-full w-full object-cover" />
+                    <Image 
+                      src={v.vendorProfile.logoUrl} 
+                      alt="Logo" 
+                      width={48} 
+                      height={48} 
+                      className="h-full w-full object-cover" 
+                    />
                   ) : (
                     <div className="flex h-full w-full items-center justify-center text-xs font-bold text-neutral-500">
                       {v.name?.charAt(0) || "V"}
