@@ -1,69 +1,109 @@
 import { PrismaClient, UserRole } from '@prisma/client'
 import bcrypt from 'bcryptjs'
+import fs from 'fs'
+import path from 'path'
 
 const prisma = new PrismaClient()
 
 async function main() {
   const passwordHash = await bcrypt.hash('abcd1234', 10)
 
-  // 1. Admin Account
-  const admin = await prisma.user.upsert({
-    where: { email: 'admin@trip-planner.com' },
-    update: {
-      passwordHash,
-      role: 'admin' as UserRole
-    },
-    create: {
-      email: 'admin@trip-planner.com',
-      name: 'System Admin',
-      passwordHash,
-      role: 'admin' as UserRole
-    }
-  })
-  console.log('Seeded Admin:', admin.email)
+  // 1. Check for user dump file
+  const dumpPath = path.join(process.cwd(), 'prisma', 'users-dump.json');
+  if (fs.existsSync(dumpPath)) {
+    console.log('Found users-dump.json. Importing users...');
+    const users = JSON.parse(fs.readFileSync(dumpPath, 'utf-8'));
+    for (const u of users) {
+      const user = await prisma.user.upsert({
+        where: { email: u.email },
+        update: {
+          name: u.name,
+          passwordHash: u.passwordHash,
+          role: u.role as UserRole,
+          preferences: u.preferences || {}
+        },
+        create: {
+          email: u.email,
+          name: u.name,
+          passwordHash: u.passwordHash,
+          role: u.role as UserRole,
+          preferences: u.preferences || {}
+        }
+      });
 
-  // 2. Vendor Account
-  const vendor = await prisma.user.upsert({
-    where: { email: 'vendor@trip-planner.com' },
-    update: {
-      passwordHash,
-      role: 'vendor' as UserRole
-    },
-    create: {
-      email: 'vendor@trip-planner.com',
-      name: 'Demo Vendor',
-      passwordHash,
-      role: 'vendor' as UserRole
+      if (u.vendorProfile) {
+        await prisma.vendorProfile.upsert({
+          where: { userId: user.id },
+          update: u.vendorProfile,
+          create: {
+            ...u.vendorProfile,
+            userId: user.id
+          }
+        });
+      }
     }
-  })
-  
-  // Ensure vendor profile exists
-  await prisma.vendorProfile.upsert({
-    where: { userId: vendor.id },
-    update: {},
-    create: {
-      userId: vendor.id,
-      intro: 'Best trips in town!',
-      isApproved: true
-    }
-  })
-  console.log('Seeded Vendor:', vendor.email)
+    console.log(`Imported ${users.length} users.`);
+  } else {
+    // Original fallback seeding if no dump exists
+    // 1. Admin Account
+    const admin = await prisma.user.upsert({
+      where: { email: 'admin@trip-planner.com' },
+      update: {
+        passwordHash,
+        role: 'admin' as UserRole
+      },
+      create: {
+        email: 'admin@trip-planner.com',
+        name: 'System Admin',
+        passwordHash,
+        role: 'admin' as UserRole
+      }
+    })
+    console.log('Seeded Admin:', admin.email)
 
-  // 3. Traveler Account
-  const traveler = await prisma.user.upsert({
-    where: { email: 'traveler@trip-planner.com' },
-    update: {
-      passwordHash,
-      role: 'traveler' as UserRole
-    },
-    create: {
-      email: 'traveler@trip-planner.com',
-      name: 'Demo Traveler',
-      passwordHash,
-      role: 'traveler' as UserRole
-    }
-  })
-  console.log('Seeded Traveler:', traveler.email)
+    // 2. Vendor Account
+    const vendor = await prisma.user.upsert({
+      where: { email: 'vendor@trip-planner.com' },
+      update: {
+        passwordHash,
+        role: 'vendor' as UserRole
+      },
+      create: {
+        email: 'vendor@trip-planner.com',
+        name: 'Demo Vendor',
+        passwordHash,
+        role: 'vendor' as UserRole
+      }
+    })
+    
+    // Ensure vendor profile exists
+    await prisma.vendorProfile.upsert({
+      where: { userId: vendor.id },
+      update: {},
+      create: {
+        userId: vendor.id,
+        intro: 'Best trips in town!',
+        isApproved: true
+      }
+    })
+    console.log('Seeded Vendor:', vendor.email)
+
+    // 3. Traveler Account
+    const traveler = await prisma.user.upsert({
+      where: { email: 'traveler@trip-planner.com' },
+      update: {
+        passwordHash,
+        role: 'traveler' as UserRole
+      },
+      create: {
+        email: 'traveler@trip-planner.com',
+        name: 'Demo Traveler',
+        passwordHash,
+        role: 'traveler' as UserRole
+      }
+    })
+    console.log('Seeded Traveler:', traveler.email)
+  }
 
   const destinations = [
     { name: 'Kuala Lumpur', country: 'Malaysia', imageUrl: 'https://images.unsplash.com/photo-1596422846543-75c6fc197f07?q=80&w=2000&auto=format&fit=crop' },

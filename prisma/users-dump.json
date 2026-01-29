@@ -1,0 +1,38 @@
+[
+  {
+    "email": "admin@trip-planner.com",
+    "name": "System Admin",
+    "passwordHash": "$2a$10$F4mR60PdBCni2I4X9ytgieX3DhMdsQAAqw8yZD82WQMY.WUNZUXiK",
+    "role": "admin",
+    "preferences": {},
+    "vendorProfile": null
+  },
+  {
+    "email": "vendor@trip-planner.com",
+    "name": "Demo Vendor",
+    "passwordHash": "$2a$10$F4mR60PdBCni2I4X9ytgieX3DhMdsQAAqw8yZD82WQMY.WUNZUXiK",
+    "role": "vendor",
+    "preferences": {
+      "currency": "MYR"
+    },
+    "vendorProfile": {
+      "intro": "Best trips in town!",
+      "logoUrl": "/uploads/vendor/logo-66f0a524-9583-4589-b70a-f482f9a7d43a.jpg",
+      "bannerUrl": "/uploads/vendor/banner-adbd95f0-6645-4908-8a3f-19917e2c8ca0.png",
+      "location": null,
+      "phone": null,
+      "website": null,
+      "isApproved": true
+    }
+  },
+  {
+    "email": "traveler@trip-planner.com",
+    "name": "Demo Traveler",
+    "passwordHash": "$2a$10$F4mR60PdBCni2I4X9ytgieX3DhMdsQAAqw8yZD82WQMY.WUNZUXiK",
+    "role": "traveler",
+    "preferences": {
+      "currency": "MYR"
+    },
+    "vendorProfile": null
+  }
+]
