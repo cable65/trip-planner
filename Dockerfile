@@ -12,6 +12,12 @@ WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 ENV NEXT_TELEMETRY_DISABLED 1
+
+# Dummy env vars for Prisma v7 build-time validation
+ENV DATABASE_URL="postgresql://dummy:dummy@localhost:5432/dummy"
+ENV NEXTAUTH_SECRET="dummy-secret-for-build"
+ENV NEXTAUTH_URL="http://localhost:3000"
+
 RUN npx prisma generate && npm run build
 
 # --- Phase 3: Runner ---
