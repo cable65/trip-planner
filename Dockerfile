@@ -4,7 +4,7 @@ RUN apk add --no-cache libc6-compat
 WORKDIR /app
 COPY package.json package-lock.json ./
 COPY prisma ./prisma/
-RUN npm ci
+RUN npm install --legacy-peer-deps
 
 # --- Phase 2: Build ---
 FROM node:20-alpine AS builder
