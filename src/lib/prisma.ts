@@ -1,6 +1,12 @@
 import { Prisma, PrismaClient } from "@prisma/client";
+import { PrismaPg } from "@prisma/adapter-pg";
+import pg from "pg";
 import { computeAuditHash } from "@/lib/audit-hash";
 import { getAuditContext } from "@/lib/audit-context";
+
+const connectionString = process.env.DATABASE_URL;
+const pool = new pg.Pool({ connectionString });
+const adapter = new PrismaPg(pool);
 
 declare global {
   var prisma: PrismaClient | undefined;
@@ -8,10 +14,10 @@ declare global {
   var auditPrisma: PrismaClient | undefined;
 }
 
-export const auditPrisma = globalThis.auditPrisma ?? new PrismaClient();
+export const auditPrisma = globalThis.auditPrisma ?? new PrismaClient({ adapter });
 globalThis.auditPrisma = auditPrisma;
 
-const prismaRaw = globalThis.prismaRaw ?? new PrismaClient();
+const prismaRaw = globalThis.prismaRaw ?? new PrismaClient({ adapter });
 globalThis.prismaRaw = prismaRaw;
 
 const auditedModels = new Set<Prisma.ModelName>([
